@@ -1,0 +1,33 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  max-width: 1440px;
+  width: 98%;
+  margin: 0 auto;
+  border-bottom: 2px solid#EA4B37;
+}
+
+.companyLogo {
+  width: 200px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 500;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.userIcon {
+  width: 24px;
+  height: 24px;
+}

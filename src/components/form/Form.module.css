@@ -1,0 +1,54 @@
+.loanForm {
+  max-width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h2 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+label {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+input,
+select {
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  border: 1px solid #ea4c38;
+  cursor: pointer;
+  outline: none;
+  transition: border 0.2s ease;
+}
+input:focus,
+select:focus {
+  border: 2px solid #ea4c38;
+}
+.personalInfo,
+.additionalInfo,
+.loanInfo,
+.financialInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
