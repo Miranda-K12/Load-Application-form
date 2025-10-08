@@ -71,6 +71,7 @@ const LoanApplicationForm = () => {
             value={formData.firstName}
             onChange={handleChange}
             error={errors.firstName}
+            required
           />
           <InputField
             label="გვარი"
@@ -78,6 +79,7 @@ const LoanApplicationForm = () => {
             value={formData.lastName}
             onChange={handleChange}
             error={errors.lastName}
+            required
           />
           <InputField
             label="პირადი ნომერი"
@@ -85,6 +87,7 @@ const LoanApplicationForm = () => {
             value={formData.personalID}
             onChange={handleChange}
             error={errors.personalID}
+            required
           />
           <InputField
             label="დაბადების თარიღი"
@@ -93,6 +96,7 @@ const LoanApplicationForm = () => {
             value={formData.dob}
             onChange={handleChange}
             error={errors.dob}
+            required
           />
           <InputField
             label="ელ-ფოსტა"
@@ -101,6 +105,7 @@ const LoanApplicationForm = () => {
             value={formData.email}
             onChange={handleChange}
             error={errors.email}
+            required
           />
           <InputField
             label="ტელეფონი"
@@ -108,6 +113,7 @@ const LoanApplicationForm = () => {
             value={formData.phone}
             onChange={handleChange}
             error={errors.phone}
+            required
           />
         </div>
         <h2>დამატებითი საკონტაქტო პირი</h2>
@@ -118,6 +124,7 @@ const LoanApplicationForm = () => {
             value={formData.contactPersonName}
             onChange={handleChange}
             error={errors.contactPersonName}
+            required
           />
           <InputField
             label="პირადი ნომერი"
@@ -125,6 +132,7 @@ const LoanApplicationForm = () => {
             value={formData.contactPersonID}
             onChange={handleChange}
             error={errors.contactPersonID}
+            required
           />
           <InputField
             label="დამატებითი 
@@ -133,13 +141,16 @@ const LoanApplicationForm = () => {
             value={formData.additionalPhone}
             onChange={handleChange}
             error={errors.additionalPhone}
+            required
           />
         </div>
 
         <h2>სესხის დეტალები</h2>
         <div className={styles.loanInfo}>
           <div className={styles.checkboxGroup}>
-            <label className={styles.label}>სესხის ტიპი</label>
+            <label className={styles.label} required>
+              სესხის ტიპი
+            </label>
             <div className={styles.checkboxList}>
               {["სამომხმარებლო", "იპოთეკური", "ავტოსესხი", "სტუდენტური"].map(
                 (type) => (
@@ -164,6 +175,7 @@ const LoanApplicationForm = () => {
             value={formData.currency}
             onChange={handleChange}
             options={["GEL", "USD", "EUR"]}
+            required
           />
           <InputField
             label="სესხის ოდენობა"
@@ -172,18 +184,21 @@ const LoanApplicationForm = () => {
             value={formData.loanAmount}
             onChange={handleChange}
             error={errors.loanAmount}
+            required
           />
           <InputField
             label="სესხის ვადა"
             name="loanTerm"
             value={formData.loanTerm}
             onChange={handleChange}
+            required
           />
           <InputField
             label="საპროცენტო განაკვეთი"
             name="interestRate"
             value={formData.interestRate}
             onChange={handleChange}
+            required
           />
           <InputField
             label="პირველი გადახდის თარიღი"
@@ -191,6 +206,7 @@ const LoanApplicationForm = () => {
             name="firstPaymentDate"
             value={formData.firstPaymentDate}
             onChange={handleChange}
+            required
           />
         </div>
         <h2>ფინანსური ინფორმაცია</h2>
@@ -201,12 +217,14 @@ const LoanApplicationForm = () => {
             name="monthlyIncome"
             value={formData.monthlyIncome}
             onChange={handleChange}
+            required
           />
           <InputField
             label="შემოსავლის წყარო"
             name="incomeSource"
             value={formData.incomeSource}
             onChange={handleChange}
+            required
           />
         </div>
         <h2>სესხის დოკუმენტაცია</h2>
@@ -216,6 +234,7 @@ const LoanApplicationForm = () => {
             type="file"
             name="documents"
             onChange={handleChange}
+            required
           />
           <InputField
             label="დამატებითი დოკუმენტაცია"
@@ -231,6 +250,7 @@ const LoanApplicationForm = () => {
             name="creditOfficerID"
             value={formData.creditOfficerID}
             onChange={handleChange}
+            required
           />
         </div>
 

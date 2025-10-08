@@ -8,11 +8,14 @@ const InputField = ({
   value,
   onChange,
   error,
+  required,
   options = [],
 }) => {
   return (
     <div className={styles.formGroup}>
-      <label>{label}</label>
+      <label htmlFor={name}>
+        {label} {required && <span style={{ color: "red" }}>*</span>}
+      </label>
 
       {type === "select" ? (
         <select name={name} value={value} onChange={onChange}>
