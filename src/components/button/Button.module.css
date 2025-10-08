@@ -1,0 +1,29 @@
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  transition: background 0.2s;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.orange {
+  background-color: #ea4c38;
+}
+
+.orange:hover {
+  background-color: #d13d2e;
+}
+
+.green {
+  background-color: #28a745;
+}
+.green:hover {
+  background-color: #218838;
+}

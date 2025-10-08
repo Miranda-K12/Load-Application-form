@@ -5,7 +5,7 @@ import LoanApplicationForm from "./components/form/Form";
 function App() {
   return (
     <>
-      <div>
+      <div className='loanApp'>
         <Header />
         <LoanApplicationForm />
       </div>
