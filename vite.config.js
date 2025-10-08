@@ -6,5 +6,3 @@ export default defineConfig({
   plugins: [react()],
   base: "/Load-Application-form/",
 });
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
