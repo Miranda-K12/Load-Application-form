@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import InputField from "./InputField";
 import styles from "./Form.module.css";
 import Button from "../button/Button.jsx";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 const LoanApplicationForm = () => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -55,7 +57,31 @@ const LoanApplicationForm = () => {
 
     console.log(formData);
   };
+  const prepareExcelData = (data) => {
+    return data.map((item) => ({
+      ...item,
 
+      loanType: Array.isArray(item.loanType)
+        ? item.loanType.join(", ")
+        : item.loanType,
+
+      documents: item.documents ? item.documents.name : "",
+    }));
+  };
+  const handleExportExcel = () => {
+    const data = prepareExcelData([formData]);
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "LoanApplication");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "LoanApplication.xlsx");
+  };
   return (
     <div className={styles.applicationPage}>
       <form className={styles.loanForm} onSubmit={handleSubmit}>
@@ -258,7 +284,7 @@ const LoanApplicationForm = () => {
           <Button type="submit" variant="orange">
             გაგზავნა
           </Button>
-          <Button type="button" variant="green">
+          <Button type="button" variant="green" onClick={handleExportExcel}>
             ექსპორტი Excel-ში
           </Button>
         </div>
