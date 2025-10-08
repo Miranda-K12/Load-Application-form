@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import InputField from "./InputField";
 import styles from "./Form.module.css";
 import Button from "../button/Button.jsx";
@@ -31,13 +31,22 @@ const LoanApplicationForm = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const successTimerRef = useRef(null);
 
   // ავტომატური განაცხადის ID
   useEffect(() => {
     const generatedID = Math.floor(1000000000 + Math.random() * 9000000000);
     setFormData((prev) => ({ ...prev, applicationID: generatedID }));
   }, []);
-
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
   // ვალიდაცია ველების მიხედვით
   const validateField = (name, value) => {
     const today = new Date();
@@ -46,107 +55,90 @@ const LoanApplicationForm = () => {
     switch (name) {
       case "firstName":
       case "lastName":
-        if (!value || !/^[ა-ჰ]{2,50}$/.test(value)) {
+        if (!value || !/^[ა-ჰ]{2,50}$/.test(value))
           return "გამოიყენეთ მხოლოდ ქართული ასოები, 2–50 სიმბოლო";
-        }
         break;
-      case "email":
-        // value-ს state-ში თავისუფლად ინახავ
-        newValue = value;
-
-        // ვალიდაცია მესიჯისთვის
-        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const emailError =
-          value && !emailPattern.test(value)
-            ? "გთხოვთ, მიუთითოთ სწორი ელ-ფოსტა"
-            : null;
-
-        setErrors((prev) => ({ ...prev, email: emailError }));
-        break;
-
       case "contactPersonName":
-        if (!/^[ა-ჰ]+\s[ა-ჰ]+$/.test(value)) {
+        if (!value || !/^[ა-ჰ]+\s[ა-ჰ]+$/.test(value))
           return "გთხოვთ მიუთითოთ სახელი და გვარი";
-        }
         break;
-
       case "personalID":
       case "contactPersonID":
       case "creditOfficerID":
-        if (!/^\d{11}$/.test(value)) {
+        if (!value || !/^\d{11}$/.test(value))
           return "გთხოვთ, შეიყვანეთ პირადი ნომერი (11 ციფრი)";
+        break;
+      case "dob":
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (!value) {
+          return "გთხოვთ, აირჩიეთ დაბადების თარიღი";
         }
         break;
-
+      case "email":
+        if (!value) return "გთხოვთ,მიუთითეთ ელ-ფოსტა";
+        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value))
+          return "შეიყვანეთ სწორი ელ-ფოსტა (ლათინური ასოები და ციფრები)";
+        break;
       case "phone":
       case "additionalPhone":
-        if (!/^\d{9}$/.test(value)) {
-          return "ტელეფონის ნომერი უნდა იყოს 9 ციფრი";
-        }
+        if (!value) return "გთხოვთ, მიუთითეთ ტელეფონის ნომერი";
+        if (!/^\d{9}$/.test(value)) return "ტელეფონის ნომერი უნდა იყოს 9 ციფრი";
         break;
-
       case "loanType":
         if (!value || value.length === 0) {
-          return "აირჩიეთ სესხის ტიპი";
+          return "გთხოვთ მონიშნეთ შესაბამისი ველი/ველები";
         }
         break;
-      case "loanTerm":
-        if (
-          !newValue ||
-          isNaN(newValue) ||
-          Number(newValue) < 1 ||
-          Number(newValue) > 60
-        )
-          return "გთხოვთ, მიუთითოთ სესხის ვადა (მაქსიმუმ 60 თვე)";
-        break;
       case "currency":
-        if (!value) return "გთხოვთ, აირჩიოთ სესხის ვალუტა";
+        if (!value) return "გთხოვთ, აირჩიოთ ვალუტა";
         break;
-
       case "loanAmount":
         if (!value || isNaN(value) || Number(value) < 500)
-          return "სესხის რაოდენობა უნდა იყოს მინიმუმ 500 ლარი (რიცხვითი ფორმატი) ";
+          return "სესხის რაოდენობა უნდა იყოს მინიმუმ 500 ლარი";
         break;
-
+      case "loanTerm":
+        if (!value || isNaN(value) || Number(value) < 1 || Number(value) > 60)
+          return "გთხოვთ მიუთითოთ სესხის ვადა (1–60 თვე)";
+        break;
       case "interestRate":
-        if (!/^\d{1,2}(\.\d{1,2})?$/.test(value))
-          return "ფორმატი უნდა იყოს XX.XX";
+        if (!/^\d{2}\.\d{2}$/.test(value)) {
+          return "პროცენტის ფორმატი უნდა იყოს XX.XX (მაგალითად 05.25 ან 12.00)";
+        }
         break;
-
-      case "firstPaymentDate":
-        if (!value || new Date(value) <= today)
-          return "უნდა იყოს მომავალი თარიღი";
+      case "firstPaymentDate": {
+        const minDate = new Date();
+        minDate.setHours(0, 0, 0, 0);
+        if (!value || new Date(value) <= minDate)
+          return "გთხოვთ, აირჩიოთ მომავალი თარიღი";
         break;
-
+      }
       case "monthlyIncome":
-        if (!value) return "გთხოვთ, შეიყვანეთ შემოსავლის რაოდენობა რიცხვებში";
+        if (!value || isNaN(value))
+          return "გთხოვთ, შეიყვანეთ თვიური შემოსავალი რიცხვებში";
         break;
-
       case "incomeSource":
-        if (!value || (Array.isArray(value) && value.length === 0))
-          return " გთხოვთ, მიუთითოთ შემოსავლის წყარო/წყაროები";
+        if (!value) return "გთხოვთ, მიუთითოთ შემოსავლის წყარო";
         break;
-
-      case "primaryDocument":
-        if (!value) return "ატვირთეთ PDF, JPG ან PNG";
-        break;
-
-      case "additionalDocument":
+        {
+          const file = formData.additionalDocument;
+          if (
+            file &&
+            !["application/pdf", "image/jpeg", "image/png"].includes(file.type)
+          )
+            return "გთხოვთ, ატვირთოთ სწორი ფორმატი (PDF, JPG ან PNG)";
+          return null;
+        }
         if (
           value &&
           !["application/pdf", "image/jpeg", "image/png"].includes(value.type)
-        ) {
-          return "დამატებითი დოკუმენტი უნდა იყოს PDF, JPG ან PNG";
-        }
-        break;
-      case "loanType":
-        if (!value || value.length === 0)
-          return "გთხოვთ მონიშნეთ შესაბამისი ველი/ველები";
-        break;
+        )
+          return "გთხოვთ, ატვირთოთ სწორი ფორმატი (PDF, JPG ან PNG)";
+        return null;
       default:
         return null;
     }
-
     return null;
   };
 
@@ -154,6 +146,9 @@ const LoanApplicationForm = () => {
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
     let newValue = value;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     switch (name) {
       case "firstName":
@@ -164,90 +159,115 @@ const LoanApplicationForm = () => {
       case "contactPersonName":
         newValue = value.replace(/[^ა-ჰ\s]/g, "").slice(0, 50);
         break;
-      case "dob":
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (!value || new Date(value) >= today) {
-          return "აირჩიეთ დაბადების თარიღი";
-        }
-        break;
+
       case "personalID":
       case "contactPersonID":
       case "creditOfficerID":
         newValue = value.replace(/\D/g, "").slice(0, 11);
         break;
-      case "loanAmount":
-        newValue = value.replace(/\D/g, "");
-        break;
+
       case "phone":
       case "additionalPhone":
         newValue = value.replace(/\D/g, "").slice(0, 9);
         break;
 
+      case "loanAmount":
+        newValue = value.replace(/\D/g, "");
+        break;
+
       case "monthlyIncome":
         newValue = value.replace(/\D/g, "");
         break;
-      case "firstPaymentDate":
-        if (!value || new Date(value) <= new Date())
-          return "აირჩიეთ გადახდის თარიღი";
-        break;
+
       case "interestRate":
-        // Value–ში მხოლოდ ციფრები და წერტილი
+        // მხოლოდ ციფრები და წერტილი
         newValue = value.replace(/[^0-9.]/g, "");
 
-        // ზღუდვა: მაქსიმუმ 2 ციფრი წერტილამდე და მაქსიმუმ 2 ციფრი წერტილის შემდეგ
-        if (/^\d{0,2}(\.\d{0,2})?$/.test(newValue)) {
-          // value სწორია, დატოვე
-        } else {
-          // value არასწორია, წაიშალოს ბოლო აკრეფილი სიმბოლო
-          newValue = formData.interestRate;
+        // ერთი წერტილი მაქსიმუმ
+        const parts = newValue.split(".");
+        if (parts.length > 2) {
+          newValue = parts[0] + "." + parts[1];
         }
+
+        // წერტილის შემდეგ მაქსიმუმ 2 ციფრი
+        if (parts[1] && parts[1].length > 2) {
+          newValue = parts[0] + "." + parts[1].slice(0, 2);
+        }
+
+        // ლაივ ვალიდაცია - ერორი გამოჩნდება დაუყოვნებლივ
+        const interestPattern = /^\d{2}\.\d{2}$/;
+        const interestError = !interestPattern.test(newValue)
+          ? "ფორმატი უნდა იყოს XX.XX (მაგალითად 05.25 ან 12.00)"
+          : null;
+
+        setErrors((prev) => ({ ...prev, interestRate: interestError }));
         break;
+
       case "loanTerm":
-        // Value-ს გავუშვათ მხოლოდ ციფრები
         newValue = value.replace(/\D/g, "");
+        if (Number(newValue) > 60) newValue = "60";
+        break;
 
-        // მაქსიმუმი 60 თვე
-        if (Number(newValue) > 60) {
-          newValue = "60";
-        }
+      case "firstPaymentDate": {
+        const minDate = new Date();
+        minDate.setHours(0, 0, 0, 0);
+        if (!value || new Date(value) <= minDate)
+          return "გთხოვთ, აირჩიოთ  თარიღი";
         break;
-      case "primaryDocument":
-      case "additionalDocument":
-        newValue = files[0] || null;
-        break;
+      }
+
       case "email":
-        // value-ს მხოლოდ ლათინური ასოები, ციფრები და დაშვებული სიმბოლოები
         newValue = value.replace(/[^a-zA-Z0-9@._-]/g, "");
-
-        // ვალიდაცია მესიჯისთვის
         const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const emailError =
-          newValue && !emailPattern.test(newValue)
-            ? "შეიყვანეთ სწორი ელ-ფოსტა (ლათინური ასოებით და ციფრებით)"
-            : null;
-
-        setErrors((prev) => ({ ...prev, email: emailError }));
+        setErrors((prev) => ({
+          ...prev,
+          email:
+            newValue && !emailPattern.test(newValue)
+              ? "შეიყვანეთ სწორი ელ-ფოსტა (ლათინური ასოები და ციფრები)"
+              : null,
+        }));
         break;
-
+      //სესხის ტიპი
       case "loanType":
-        // checkbox–ის შემთხვევაში, checked და value უნდა მოვიყვანოთ
         if (checked) {
           newValue = [...formData.loanType, value];
         } else {
           newValue = formData.loanType.filter((item) => item !== value);
         }
         break;
+
       case "currency":
-        if (!value) return "გთხოვთ აირჩიოთ ვალუტა";
+        if (!value) {
+          setErrors((prev) => ({
+            ...prev,
+            currency: "გთხოვთ აირჩიოთ ვალუტა",
+          }));
+        } else {
+          setErrors((prev) => ({ ...prev, currency: null }));
+        }
         break;
+      case "dob":
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (!value) {
+          return "გთხოვთ, აირჩიეთ დაბადების თარიღი";
+        }
+
+        if (new Date(value) > today) {
+          return "დაბადების თარიღი არ შეიძლება იყოს მომავლის თარიღი";
+        }
+        break;
+
       default:
         break;
     }
 
     setFormData((prev) => ({ ...prev, [name]: newValue }));
-    const err = validateField(name, newValue);
-    setErrors((prev) => ({ ...prev, [name]: err }));
+
+    // Field validation
+    const fieldError = validateField(name, newValue);
+    setErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
 
   // სრული ვალიდაცია submit–ისთვის
@@ -315,19 +335,51 @@ const LoanApplicationForm = () => {
     saveAs(blob, "LoanApplication.xlsx");
   };
   const handleSubmit = (e) => {
-    e.preventDefault(); // არ დატვირთოს გვერდი
+    e.preventDefault();
 
-    const isValid = validateForm(); // შეამოწმებს ყველა ველს
+    const isValid = validateForm();
     if (!isValid) {
-      console.log("Validation failed:", errors);
-      return; // ფორმა არ უნდა დაისაბმითდეს, თუ არის შეცდომები
+      setSuccessMessage(""); // თუ ფორმა არასწორია, მესიჯი წაშალე
+      return;
     }
 
-    // ფორმა სწორია — აქ შეგიძლია API სთხოვო ან კონსოლში გამოიტანო
+    // ფორმა სწორია
     console.log("Submitting form:", formData);
 
-    // მაგალითად, შეგიძლია ექსპორტი Excel ან სხვა ლოგიკა
-    // handleExportExcel();
+    setSuccessMessage("ფორმა წარმატებით გაიგზავნა!"); // მესიჯი
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+    }
+    successTimerRef.current = setTimeout(() => {
+      setSuccessMessage("");
+      successTimerRef.current = null;
+    }, 5000);
+    // შეგიძლიათ აქ ფაილები/სხვა state–ებიც დაასუფთავოთ
+    setFormData({
+      firstName: "",
+      lastName: "",
+      personalID: "",
+      dob: "",
+      email: "",
+      phone: "",
+      additionalPhone: "",
+      contactPersonName: "",
+      contactPersonID: "",
+      loanType: [],
+      currency: "",
+      loanAmount: "",
+      loanTerm: "",
+      monthlyIncome: "",
+      incomeSource: "",
+      firstPaymentDate: "",
+      primaryDocument: null,
+      additionalDocument: null,
+      creditOfficerID: "",
+      interestRate: "",
+      applicationID: formData.applicationID, // ან ახალი ID
+    });
+
+    setErrors({});
   };
   return (
     <div className={styles.applicationPage}>
@@ -440,7 +492,12 @@ const LoanApplicationForm = () => {
               )}
             </div>
             {errors.loanType && (
-              <p className={styles.error}>{errors.loanType}</p>
+              <p
+                className={styles.error}
+                style={{ color: "red", fontSize: "10px" }}
+              >
+                {errors.loanType}
+              </p>
             )}
           </div>
           <InputField
@@ -486,6 +543,11 @@ const LoanApplicationForm = () => {
             onChange={handleChange}
             error={errors.firstPaymentDate}
             required
+            min={
+              new Date(Date.now() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[0]
+            }
           />
         </div>
 
@@ -520,6 +582,7 @@ const LoanApplicationForm = () => {
             name="primaryDocument"
             onChange={handleChange}
             error={errors.primaryDocument}
+            accept=".pdf, .jpg, .jpeg, .png"
             required
           />
           <InputField
@@ -528,6 +591,7 @@ const LoanApplicationForm = () => {
             name="additionalDocument"
             onChange={handleChange}
             error={errors.additionalDocument}
+            accept=".pdf, .jpg, .jpeg, .png"
           />
         </div>
 
@@ -543,7 +607,7 @@ const LoanApplicationForm = () => {
             required
           />
         </div>
-
+        {successMessage && <h3 className={styles.success}>{successMessage}</h3>}
         {/* ღილაკები */}
         <div className={styles.buttonContainer}>
           <Button type="submit" variant="orange">

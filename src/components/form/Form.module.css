@@ -70,7 +70,11 @@ select:focus {
   font-weight: 500;
   margin-bottom: 12px;
 }
-
+.success {
+  font-size: 24px;
+  color: #ea4b37;
+  text-align: center;
+}
 .checkboxList {
   display: flex;
   gap: 8px;
