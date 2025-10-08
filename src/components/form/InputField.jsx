@@ -30,7 +30,14 @@ const InputField = ({
         <input type={type} name={name} value={value} onChange={onChange} />
       )}
 
-      {error && <span className={styles.error}>{error}</span>}
+      {error && (
+        <span
+          className={styles.error}
+          style={{ color: "red", fontSize: "10px", marginTop: "6px" }}
+        >
+          {error}
+        </span>
+      )}
     </div>
   );
 };

@@ -88,9 +88,11 @@ select:focus {
   accent-color: #ea4b37;
 }
 .error {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: 4px;
+  .error {
+    color: red;
+    font-size: 10px;
+    margin-top: 4px;
+  }
 }
 .buttonContainer {
   display: flex;
