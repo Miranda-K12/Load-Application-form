@@ -98,6 +98,7 @@ select:focus {
     margin-top: 4px;
   }
 }
+
 .buttonContainer {
   display: flex;
 
@@ -105,8 +106,9 @@ select:focus {
   gap: 48px;
   margin-top: 48px;
 }
-.loadId {
+.loanId {
   border: none;
+  margin-left: 12px;
 }
 
 @media (max-width: 1100px) {

@@ -35,7 +35,6 @@ const LoanApplicationForm = () => {
 
   const successTimerRef = useRef(null);
 
-  // ავტომატური განაცხადის ID
   useEffect(() => {
     const generatedID = Math.floor(1000000000 + Math.random() * 9000000000);
     setFormData((prev) => ({ ...prev, applicationID: generatedID }));
@@ -307,10 +306,8 @@ const LoanApplicationForm = () => {
       case "primaryDocument": {
         const file = e.target.files[0] || null;
 
-        // ვანახავთ state-ში
         setFormData((prev) => ({ ...prev, primaryDocument: file }));
 
-        // ერორის განახლება მხოლოდ მაშინ, თუ არაფერი ატვირთულია
         setErrors((prev) => ({
           ...prev,
           primaryDocument: !file
@@ -446,8 +443,14 @@ const LoanApplicationForm = () => {
   return (
     <div className={styles.applicationPage}>
       <form className={styles.loanForm} onSubmit={handleSubmit}>
-        <label>განაცხადის ID: {formData.applicationID}</label>
-
+        <label>სესხის ID</label>
+        <input
+          className={styles.loanId}
+          type="text"
+          name="applicationID"
+          value={formData.applicationID}
+          readOnly
+        />
         {/* პირადი ინფორმაცია */}
         <h2>პირადი ინფორმაცია</h2>
         <div className={styles.personalInfo}>
