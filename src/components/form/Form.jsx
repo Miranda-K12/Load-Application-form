@@ -178,30 +178,35 @@ const LoanApplicationForm = () => {
       case "monthlyIncome":
         newValue = value.replace(/\D/g, "");
         break;
-
-      case "interestRate":
-        // მხოლოდ ციფრები და წერტილი
-        newValue = value.replace(/[^0-9.]/g, "");
+      case "interestRate": {
+        let newValue = value.replace(/[^0-9.]/g, "");
 
         // ერთი წერტილი მაქსიმუმ
         const parts = newValue.split(".");
-        if (parts.length > 2) {
-          newValue = parts[0] + "." + parts[1];
-        }
-
-        // წერტილის შემდეგ მაქსიმუმ 2 ციფრი
-        if (parts[1] && parts[1].length > 2) {
+        if (parts.length > 2) newValue = parts[0] + "." + parts[1];
+        if (parts[1] && parts[1].length > 2)
           newValue = parts[0] + "." + parts[1].slice(0, 2);
+
+        // State-ში შენახვა
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
+
+        // Live ვალიდაცია
+        let error = null;
+
+        if (newValue.includes(".")) {
+          // თუ წერტილი არის, ვამოწმებთ regex
+          if (!/^\d{1,2}\.\d{2}$/.test(newValue)) {
+            error =
+              "პროცენტის ფორმატი უნდა იყოს X.XX ან XX.XX (მაგალითად 5.67 ან 12.34)";
+          }
+        } else {
+          // ჯერ არ დაწერილა წერტილი, ერორი არ ვაჩვენოთ
+          error = null;
         }
 
-        // ლაივ ვალიდაცია - ერორი გამოჩნდება დაუყოვნებლივ
-        const interestPattern = /^\d{2}\.\d{2}$/;
-        const interestError = !interestPattern.test(newValue)
-          ? "ფორმატი უნდა იყოს XX.XX (მაგალითად 05.25 ან 12.00)"
-          : null;
-
-        setErrors((prev) => ({ ...prev, interestRate: interestError }));
+        setErrors((prev) => ({ ...prev, [name]: error }));
         break;
+      }
 
       case "loanTerm":
         newValue = value.replace(/\D/g, "");
