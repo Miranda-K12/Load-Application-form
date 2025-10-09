@@ -99,8 +99,8 @@ const LoanApplicationForm = () => {
           return "სესხის რაოდენობა უნდა იყოს მინიმუმ 500 ლარი";
         break;
       case "loanTerm":
-        if (!value || isNaN(value) || Number(value) < 1 || Number(value) > 60)
-          return "გთხოვთ მიუთითოთ სესხის ვადა (1–60 თვე)";
+        if (!value || isNaN(value) || Number(value) <= 0)
+          return "გთხოვთ მიუთითოთ სესხის ვადა (მინიმუმ 1 თვე)";
         break;
       case "interestRate":
         if (!/^\d{2}\.\d{2}$/.test(value)) {
@@ -208,10 +208,27 @@ const LoanApplicationForm = () => {
         break;
       }
 
-      case "loanTerm":
-        newValue = value.replace(/\D/g, "");
-        if (Number(newValue) > 60) newValue = "60";
+      case "loanTerm": {
+        // მხოლოდ ციფრები, უარყოფითი და ნულს არ უშვებს
+        let newValue = value.replace(/\D/g, "");
+
+        // თუ აკრიფა 0–ით იწყება, ამოშალე
+        while (newValue.startsWith("0")) {
+          newValue = newValue.slice(1);
+        }
+
+        const months = Number(newValue);
+
+        // Validation: უნდა იყოს > 0
+        const error =
+          !newValue || months <= 0
+            ? "გთხოვთ მიუთითოთ სესხის ვადა (მინიმუმ 1 თვე)"
+            : null;
+
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
+        setErrors((prev) => ({ ...prev, [name]: error }));
         break;
+      }
 
       case "firstPaymentDate": {
         const minDate = new Date();
@@ -240,7 +257,43 @@ const LoanApplicationForm = () => {
           newValue = formData.loanType.filter((item) => item !== value);
         }
         break;
+      case "loanTerm": {
+        // Keep only digits
+        let newValue = value.replace(/\D/g, "");
 
+        // Convert to number
+        const months = Number(newValue);
+
+        // Validation: must be > 0
+        let error = null;
+        if (!newValue || months <= 0) {
+          error = "გთხოვთ მიუთითოთ სესხის ვადა (მინიმუმ 1 თვე)";
+        }
+
+        // Convert to text format
+        let termText = "";
+        if (months > 0) {
+          if (months < 12) {
+            termText = `${months} თვე`;
+          } else {
+            const years = Math.floor(months / 12);
+            const remainingMonths = months % 12;
+            termText =
+              remainingMonths === 0
+                ? `${years} წელი`
+                : `${years} წელი ${remainingMonths} თვე`;
+          }
+        }
+
+        // Update state
+        setFormData((prev) => ({
+          ...prev,
+          [name]: newValue,
+          loanTermText: termText,
+        }));
+        setErrors((prev) => ({ ...prev, [name]: error }));
+        break;
+      }
       case "currency":
         if (!value) {
           setErrors((prev) => ({
@@ -531,6 +584,7 @@ const LoanApplicationForm = () => {
             onChange={handleChange}
             error={errors.loanTerm}
             required
+            min="1"
           />
           <InputField
             label="საპროცენტო განაკვეთი"
