@@ -34,4 +34,16 @@
   .title {
     font-size: 24px;
   }
+  .userRole {
+    font-size: 12px;
+  }
+}
+@media (max-width: 900px) {
+  .companyLogo,
+  .headerRight {
+    display: none;
+  }
+  .header {
+    justify-content: center;
+  }
 }

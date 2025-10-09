@@ -101,7 +101,6 @@ select:focus {
 
 .buttonContainer {
   display: flex;
-
   justify-content: center;
   gap: 48px;
   margin-top: 48px;
@@ -123,5 +122,10 @@ select:focus {
     display: grid;
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+}
+@media (max-width: 768px) {
+  .checkboxList {
+    flex-direction: column;
   }
 }
