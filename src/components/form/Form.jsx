@@ -121,21 +121,9 @@ const LoanApplicationForm = () => {
       case "incomeSource":
         if (!value) return "გთხოვთ, მიუთითოთ შემოსავლის წყარო";
         break;
-        {
-          const file = formData.additionalDocument;
-          if (
-            file &&
-            !["application/pdf", "image/jpeg", "image/png"].includes(file.type)
-          )
-            return "გთხოვთ, ატვირთოთ სწორი ფორმატი (PDF, JPG ან PNG)";
-          return null;
-        }
-        if (
-          value &&
-          !["application/pdf", "image/jpeg", "image/png"].includes(value.type)
-        )
-          return "გთხოვთ, ატვირთოთ სწორი ფორმატი (PDF, JPG ან PNG)";
-        return null;
+      case "primaryDocument":
+        if (!value) return "გთხოვთ ატვირთოთ პირადი დოკუმენტი (PDF, JPG ან PNG)";
+        break;
       default:
         return null;
     }
@@ -316,6 +304,22 @@ const LoanApplicationForm = () => {
           return "დაბადების თარიღი არ შეიძლება იყოს მომავლის თარიღი";
         }
         break;
+      case "primaryDocument": {
+        const file = e.target.files[0] || null;
+
+        // ვანახავთ state-ში
+        setFormData((prev) => ({ ...prev, primaryDocument: file }));
+
+        // ერორის განახლება მხოლოდ მაშინ, თუ არაფერი ატვირთულია
+        setErrors((prev) => ({
+          ...prev,
+          primaryDocument: !file
+            ? "გთხოვთ ატვირთოთ პირადი დოკუმენტი (PDF, JPG ან PNG)"
+            : null,
+        }));
+
+        break;
+      }
 
       default:
         break;
